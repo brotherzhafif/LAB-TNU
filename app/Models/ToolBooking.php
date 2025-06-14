@@ -13,6 +13,8 @@ class ToolBooking extends Model
 
     protected $fillable = [
         'user_id',
+        'nama_pengguna',
+        'nit_nip',
         'tool_id',
         'lab_id',
         'course',
@@ -20,6 +22,7 @@ class ToolBooking extends Model
         'waktu_mulai',
         'waktu_selesai',
         'jumlah',
+        'jumlah_dikembalikan',
         'status',
         'bukti_selesai',
     ];
@@ -38,6 +41,25 @@ class ToolBooking extends Model
     public function tool()
     {
         return $this->belongsTo(Tool::class);
+    }
+
+    // Method untuk validasi bentrok waktu booking alat
+    public static function isConflict($toolId, $tanggal, $waktuMulai, $waktuSelesai, $excludeId = null)
+    {
+        $query = self::where('tool_id', $toolId)
+            ->where('tanggal', $tanggal)
+            ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
+                $q->whereBetween('waktu_mulai', [$waktuMulai, $waktuSelesai])
+                  ->orWhereBetween('waktu_selesai', [$waktuMulai, $waktuSelesai])
+                  ->orWhere(function ($q2) use ($waktuMulai, $waktuSelesai) {
+                      $q2->where('waktu_mulai', '<=', $waktuMulai)
+                         ->where('waktu_selesai', '>=', $waktuSelesai);
+                  });
+            });
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+        return $query->whereIn('status', ['pending', 'approved'])->exists();
     }
 
 }

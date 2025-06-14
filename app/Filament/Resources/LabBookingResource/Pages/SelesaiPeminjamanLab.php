@@ -6,6 +6,7 @@ use App\Filament\Resources\LabBookingResource;
 use App\Models\LabBooking;
 use Filament\Forms;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Storage;
 use Livewire\WithFileUploads;
 
 class SelesaiPeminjamanLab extends Page implements Forms\Contracts\HasForms
@@ -26,7 +27,7 @@ class SelesaiPeminjamanLab extends Page implements Forms\Contracts\HasForms
         abort_unless(auth()->id() === $this->booking->user_id, 403);
 
         $this->form->fill([
-            'data.bukti_selesai' => $this->booking->bukti_selesai,
+            'data.bukti_selesai' => null,
         ]);
     }
 
@@ -35,24 +36,33 @@ class SelesaiPeminjamanLab extends Page implements Forms\Contracts\HasForms
         return [
             Forms\Components\FileUpload::make('bukti_selesai')
                 ->label('Upload Bukti Selesai')
-                ->directory('bukti-lab')
                 ->required()
                 ->image()
-                ->preserveFilenames()
-                ->getUploadedFileNameForStorageUsing(fn($file) => $file->hashName())
+                ->maxSize(2048)
+                ->disk('public')
+                ->directory('bukti-lab')
                 ->statePath('data.bukti_selesai')
                 ->maxFiles(1)
                 ->multiple(false)
-                ->columnSpanFull()
-                ->dehydrateStateUsing(fn($state) => is_array($state) ? array_key_first($state) : $state)
+                ->columnSpanFull(),
         ];
     }
 
     public function submit()
     {
+        $uploaded = $this->data['bukti_selesai'] ?? null;
+        $path = null;
+
+        // Handle upload manual
+        if ($uploaded && is_object($uploaded) && method_exists($uploaded, 'store')) {
+            $path = $uploaded->store('bukti-lab', 'public');
+        } elseif (is_string($uploaded)) {
+            $path = $uploaded;
+        }
+
         $this->booking->update([
-            'bukti_selesai' => $this->data['bukti_selesai'],
-            
+            'bukti_selesai' => $path,
+            // 'status' => 'completed',
         ]);
 
         session()->flash('success', 'Peminjaman berhasil ditandai selesai.');

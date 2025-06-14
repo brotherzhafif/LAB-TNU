@@ -14,6 +14,8 @@ class LabBooking extends Model
 
     protected $fillable = [
         'user_id',
+        'nama_pengguna',
+        'nit_nip',
         'lab_id',
         'course',
         'tanggal',
@@ -34,4 +36,21 @@ class LabBooking extends Model
         return $this->belongsTo(Lab::class);
     }
 
+    public static function isConflict($labId, $tanggal, $waktuMulai, $waktuSelesai, $excludeId = null)
+    {
+        $query = self::where('lab_id', $labId)
+            ->where('tanggal', $tanggal)
+            ->where(function ($q) use ($waktuMulai, $waktuSelesai) {
+                $q->whereBetween('waktu_mulai', [$waktuMulai, $waktuSelesai])
+                    ->orWhereBetween('waktu_selesai', [$waktuMulai, $waktuSelesai])
+                    ->orWhere(function ($q2) use ($waktuMulai, $waktuSelesai) {
+                        $q2->where('waktu_mulai', '<=', $waktuMulai)
+                            ->where('waktu_selesai', '>=', $waktuSelesai);
+                    });
+            });
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+        return $query->whereIn('status', ['pending', 'approved'])->exists();
+    }
 }

@@ -19,12 +19,12 @@ return new class extends Migration {
             $table->time('waktu_mulai');
             $table->time('waktu_selesai');
             $table->text('keperluan')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->string('bukti_selesai')->nullable(); // jika ada upload bukti nantinya
+            $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
+            // Ubah kolom bukti_selesai agar bisa menyimpan banyak file (array JSON path gambar)
+            $table->json('bukti_selesai')->nullable(); // sekarang json, bukan varchar
             $table->timestamps();
         });
     }
-
 
     /**
      * Reverse the migrations.

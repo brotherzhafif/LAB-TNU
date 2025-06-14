@@ -24,47 +24,116 @@ class LabBookingResource extends Resource
     {
         return $form->schema([
             Forms\Components\Hidden::make('user_id')->default(auth()->id()),
+            Forms\Components\TextInput::make('nama_pengguna')
+                ->label('Nama Pengguna')
+                ->required()
+                ->default(fn() => auth()->user()?->name)
+                ->disabled(
+                    fn($record) => !auth()->user()->hasRole('pengguna') ||
+                    ($record && $record->status !== 'pending')
+                ),
+            Forms\Components\TextInput::make('nit_nip')
+                ->label('NIT/NIP')
+                ->required()
+                ->default(fn() => auth()->user()?->nit_nip)
+                ->disabled(
+                    fn($record) => !auth()->user()->hasRole('pengguna') ||
+                    ($record && $record->status !== 'pending')
+                ),
             Forms\Components\Select::make('lab_id')
                 ->label('Laboratorium')
                 ->relationship('lab', 'name')
-                ->required(),
+                ->required()
+                ->disabled(
+                    fn($record) => !auth()->user()->hasRole('pengguna') ||
+                    ($record && $record->status !== 'pending')
+                ),
 
             Forms\Components\TextInput::make('course')
-                ->label('Course / Mata Kuliah'),
+                ->label('Course / Mata Kuliah')
+                ->disabled(
+                    fn($record) => !auth()->user()->hasRole('pengguna') ||
+                    ($record && $record->status !== 'pending')
+                ),
 
-            Forms\Components\DatePicker::make('tanggal')
-                ->label('Tanggal')
-                ->required(),
-
-            Forms\Components\TimePicker::make('waktu_mulai')
-                ->label('Waktu Mulai')
-                ->required(),
-
-            Forms\Components\TimePicker::make('waktu_selesai')
-                ->label('Waktu Selesai')
-                ->required(),
-
-            Forms\Components\Textarea::make('keperluan')
-                ->label('Keperluan'),
+            Forms\Components\Grid::make(4)
+                ->schema([
+                    Forms\Components\DatePicker::make('tanggal')
+                        ->label('Tanggal')
+                        ->required()
+                        ->columnSpan(2)
+                        ->disabled(
+                            fn($record) => !auth()->user()->hasRole('pengguna') ||
+                            ($record && $record->status !== 'pending')
+                        ),
+                    Forms\Components\TimePicker::make('waktu_mulai')
+                        ->label('Waktu Mulai')
+                        ->withoutSeconds()
+                        ->required()
+                        ->columnSpan(1)
+                        ->disabled(
+                            fn($record) => !auth()->user()->hasRole('pengguna') ||
+                            ($record && $record->status !== 'pending')
+                        ),
+                    Forms\Components\TimePicker::make('waktu_selesai')
+                        ->label('Waktu Selesai')
+                        ->withoutSeconds()
+                        ->required()
+                        ->columnSpan(1)
+                        ->disabled(
+                            fn($record) => !auth()->user()->hasRole('pengguna') ||
+                            ($record && $record->status !== 'pending')
+                        ),
+                ])
+                ->afterStateHydrated(function ($component, $state) {
+                    // ...existing code...
+                }),
+            Forms\Components\Section::make()
+                ->schema([
+                    Forms\Components\Hidden::make('conflict_check')->afterStateUpdated(function ($state, callable $set, callable $get, $record) {
+                        $labId = $get('lab_id');
+                        $tanggal = $get('tanggal');
+                        $mulai = $get('waktu_mulai');
+                        $selesai = $get('waktu_selesai');
+                        $excludeId = $record ? $record->id : null;
+                        if ($labId && $tanggal && $mulai && $selesai) {
+                            if (\App\Models\LabBooking::isConflict($labId, $tanggal, $mulai, $selesai, $excludeId)) {
+                                throw \Filament\Forms\Components\ComponentException::make('Waktu peminjaman lab bentrok dengan booking lain.');
+                            }
+                        }
+                    }),
+                ]),
 
             Forms\Components\Select::make('status')
-                ->options([
-                    'pending' => 'Pending',
-                    'approved' => 'Approved',
-                    'rejected' => 'Rejected',
-                    'completed' => 'Completed',
-                ])
+                ->options(function ($get, $record) {
+                    $options = [
+                        'pending' => 'Pending',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ];
+                    // Jika status completed, tampilkan juga completed
+                    if (($record && $record->status === 'completed') || $get('status') === 'completed') {
+                        $options['completed'] = 'Completed';
+                    }
+                    return $options;
+                })
                 ->default('pending')
-                ->disabled(fn() => auth()->user()->hasRole('pengguna')),
+                ->hidden(
+                    fn($record) =>
+                    auth()->user()->hasRole('pengguna')
+                )
+                ->disabled(fn($record) => $record && $record->status === 'completed'),
         ]);
     }
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('nama_pengguna')->label('Nama Pengguna')->searchable(),
+                Tables\Columns\TextColumn::make('nit_nip')->label('NIT/NIP')->searchable(),
                 Tables\Columns\TextColumn::make('user.name')->label('Pengguna'),
-                Tables\Columns\TextColumn::make('lab.name')->label('Lab'),
-                Tables\Columns\TextColumn::make('tanggal')->date('d M Y'),
+                Tables\Columns\TextColumn::make('lab.name')->label('Lab')->searchable(),
+                Tables\Columns\TextColumn::make('tanggal')->date('d M Y')->searchable(),
                 Tables\Columns\TextColumn::make('waktu_mulai'),
                 Tables\Columns\TextColumn::make('waktu_selesai'),
                 Tables\Columns\BadgeColumn::make('status')
@@ -85,7 +154,11 @@ class LabBookingResource extends Resource
                     ->label('Selesai')
                     ->icon('heroicon-m-check-circle')
                     ->url(fn($record) => route('filament.super-admin.resources.lab-bookings.selesai-peminjaman-lab', ['record' => $record->id]))
-                    ->visible(fn($record) => $record->status === 'approved')
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole('pengguna') &&
+                        $record->status === 'approved'
+                    ),
             ]);
     }
 
@@ -106,5 +179,8 @@ class LabBookingResource extends Resource
         ];
     }
 
-
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->latest('created_at');
+    }
 }

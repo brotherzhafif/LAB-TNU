@@ -8,6 +8,7 @@ use App\Models\ToolBooking;
 use App\Models\Tool;
 use Filament\Forms;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Log;
 
 
 class SelesaiPeminjamanAlat extends Page
@@ -27,8 +28,8 @@ class SelesaiPeminjamanAlat extends Page
         abort_unless(auth()->id() === $this->booking->user_id, 403);
 
         $this->form->fill([
-            'jumlah_dikembalikan' => $this->booking->jumlah_dikembalikan,
-            'bukti_selesai' => $this->booking->bukti_selesai,
+            'data.jumlah_dikembalikan' => $this->booking->jumlah_dikembalikan,
+            'data.bukti_selesai' => $this->booking->bukti_selesai,
         ]);
     }
 
@@ -44,28 +45,54 @@ class SelesaiPeminjamanAlat extends Page
                 ->statePath('data.jumlah_dikembalikan'),
 
             Forms\Components\FileUpload::make('bukti_selesai')
-                ->label('Upload Bukti Selesai')
-                ->directory('bukti-alat')
+                ->label('Bukti selesai')
+                ->disk('public')
+                ->directory('bukti-alat') // atau 'bukti-lab'
                 ->required()
                 ->image()
                 ->preserveFilenames()
                 ->getUploadedFileNameForStorageUsing(fn($file) => $file->hashName())
-                ->statePath('data.bukti_selesai')
                 ->maxFiles(1)
                 ->multiple(false)
                 ->columnSpanFull()
-                ->dehydrateStateUsing(fn($state) => is_array($state) ? array_key_first($state) : $state)
+                ->statePath('data.bukti_selesai')
+            // ->dehydrateStateUsing(fn($state) => is_array($state) ? ($state[0] ?? null) : $state)
         ];
     }
 
     public function submit()
     {
-        $this->booking->update([
-            'jumlah_dikembalikan' => $this->data['jumlah_dikembalikan'],
+        Log::info('Data sebelum update:', [
+            'jumlah_dikembalikan' => $this->data['jumlah_dikembalikan'] ?? null,
             'bukti_selesai' => $this->data['bukti_selesai'] ?? null,
-            'status' => 'completed',
         ]);
 
+        // Ambil hanya path string dari hasil upload (bukan TemporaryUploadedFile)
+        $bukti = [];
+        if (is_array($this->data['bukti_selesai'])) {
+            foreach ($this->data['bukti_selesai'] as $item) {
+                if (is_string($item)) {
+                    $bukti[] = $item;
+                } elseif (is_object($item) && method_exists($item, 'getFilename')) {
+                    $bukti[] = $item->getFilename();
+                }
+            }
+        } elseif (is_string($this->data['bukti_selesai'])) {
+            $bukti[] = $this->data['bukti_selesai'];
+        }
+
+        Log::info('Bukti selesai yang akan disimpan:', $bukti);
+
+        $this->booking->update([
+            'jumlah_dikembalikan' => $this->data['jumlah_dikembalikan'],
+            'bukti_selesai' => $bukti,
+            // 'status' => 'completed',
+        ]);
+
+        Log::info('Booking updated', [
+            'booking_id' => $this->booking->id,
+            'bukti_selesai' => $this->booking->bukti_selesai,
+        ]);
         // Update stok alat
         $tool = $this->booking->tool;
         $tool->available_quantity += (int) $this->data['jumlah_dikembalikan'];
