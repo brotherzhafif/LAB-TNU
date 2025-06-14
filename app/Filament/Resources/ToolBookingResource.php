@@ -74,8 +74,9 @@ class ToolBookingResource extends Resource
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'warning' => 'pending',
-                        'success' => 'approved',
+                        'info' => 'approved',
                         'danger' => 'rejected',
+                        'success' => 'completed',
                     ]),
             ])
             ->filters([
@@ -83,22 +84,23 @@ class ToolBookingResource extends Resource
                     'pending' => 'Pending',
                     'approved' => 'Approved',
                     'rejected' => 'Rejected',
+                    'completed' => 'Completed',
                 ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn($record) => $record->status === 'pending'),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn($record) => $record->status === 'pending'),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')
                     ->icon('heroicon-m-check-circle')
                     ->color('success')
                     ->url(fn($record) => route('filament.super-admin.resources.tool-bookings.selesai-peminjaman-alat', ['record' => $record->id]))
-                    ->openUrlInNewTab()
                     ->visible(
                         fn($record) =>
                         auth()->user()->hasRole('pengguna') &&
-                        $record->status === 'approved' &&
-                        !$record->selesai
+                        $record->status === 'approved'
                     ),
             ]);
     }

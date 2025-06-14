@@ -47,7 +47,14 @@ class SelesaiPeminjamanAlat extends Page
                 ->label('Upload Bukti Selesai')
                 ->directory('bukti-alat')
                 ->required()
-                ->statePath('data.bukti_selesai'),
+                ->image()
+                ->preserveFilenames()
+                ->getUploadedFileNameForStorageUsing(fn($file) => $file->hashName())
+                ->statePath('data.bukti_selesai')
+                ->maxFiles(1)
+                ->multiple(false)
+                ->columnSpanFull()
+                ->dehydrateStateUsing(fn($state) => is_array($state) ? array_key_first($state) : $state)
         ];
     }
 
@@ -56,7 +63,7 @@ class SelesaiPeminjamanAlat extends Page
         $this->booking->update([
             'jumlah_dikembalikan' => $this->data['jumlah_dikembalikan'],
             'bukti_selesai' => $this->data['bukti_selesai'] ?? null,
-            'selesai' => true,
+            'status' => 'completed',
         ]);
 
         // Update stok alat

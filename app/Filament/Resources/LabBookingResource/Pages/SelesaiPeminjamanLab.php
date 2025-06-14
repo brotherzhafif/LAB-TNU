@@ -37,7 +37,14 @@ class SelesaiPeminjamanLab extends Page implements Forms\Contracts\HasForms
                 ->label('Upload Bukti Selesai')
                 ->directory('bukti-lab')
                 ->required()
-                ->statePath('data.bukti_selesai'),
+                ->image()
+                ->preserveFilenames()
+                ->getUploadedFileNameForStorageUsing(fn($file) => $file->hashName())
+                ->statePath('data.bukti_selesai')
+                ->maxFiles(1)
+                ->multiple(false)
+                ->columnSpanFull()
+                ->dehydrateStateUsing(fn($state) => is_array($state) ? array_key_first($state) : $state)
         ];
     }
 
@@ -45,7 +52,7 @@ class SelesaiPeminjamanLab extends Page implements Forms\Contracts\HasForms
     {
         $this->booking->update([
             'bukti_selesai' => $this->data['bukti_selesai'],
-            'selesai' => true,
+            
         ]);
 
         session()->flash('success', 'Peminjaman berhasil ditandai selesai.');
