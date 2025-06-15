@@ -14,7 +14,7 @@
     ],
     "env": {
         "APP_NAME": "Manajemen LAB TNU",
-        "APP_ENV": "local",
+        "APP_ENV": "production",
         "APP_KEY": "base64:Myxg7qadJQyZraQ/BQvJBKcNNY9KHSc1QwxrqdMsHy0=",
         "APP_DEBUG": "true",
         "APP_URL": "https://lab-tnu.vercel.app/",
