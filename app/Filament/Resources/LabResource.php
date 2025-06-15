@@ -17,11 +17,13 @@ class LabResource extends Resource
 {
     protected static ?string $model = Lab::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-library';
 
-    public static function canAccess(): bool
+    protected static ?int $navigationSort = 10; // Labs setelah Dashboard
+
+    public static function getGlobalSearchAttributes(): array
     {
-        return auth()->user()->hasRole(['admin', 'superadmin']);
+        return ['name', 'location'];
     }
 
     public static function form(Form $form): Form
@@ -42,20 +44,30 @@ class LabResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Nama Lab'),
-                Tables\Columns\TextColumn::make('location')->label('Lokasi'),
+                Tables\Columns\TextColumn::make('name')->label('Nama Lab')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('location')->label('Lokasi')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime('d M Y')
-                    ->label('Dibuat'),
-            ])
-            ->filters([
+                    ->label('Dibuat')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),
+                Tables\Actions\Action::make('book')
+                    ->label('Book')
+                    ->icon('heroicon-o-plus-circle')
+                    ->url(fn($record) => route('filament.super-admin.resources.lab-bookings.create', [
+                        'lab_id' => $record->id,
+                    ]))
+                    ->visible(fn() => auth()->user()->hasRole('pengguna')),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),
             ]);
     }
 

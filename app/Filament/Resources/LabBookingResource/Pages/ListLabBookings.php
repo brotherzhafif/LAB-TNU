@@ -13,10 +13,14 @@ class ListLabBookings extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\CreateAction::make(),
-        ];
+        if (auth()->user()->hasRole('pengguna')) {
+            return [
+                Actions\CreateAction::make(),
+            ];
+        }
+        return [];
     }
+
     protected function getTableQuery(): Builder
     {
         $query = parent::getTableQuery();

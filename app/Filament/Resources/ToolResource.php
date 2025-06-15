@@ -17,13 +17,9 @@ class ToolResource extends Resource
 {
     protected static ?string $model = Tool::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()->hasRole(['admin', 'superadmin']);
-    }
-
+    protected static ?int $navigationSort = 20; // Tools setelah Labs
 
     public static function form(Form $form): Form
     {
@@ -52,10 +48,10 @@ class ToolResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->label('Nama Alat'),
-                Tables\Columns\TextColumn::make('lab.name')->label('Laboratorium'),
-                Tables\Columns\TextColumn::make('total_quantity')->label('Total'),
-                Tables\Columns\TextColumn::make('available_quantity')->label('Tersedia'),
+                Tables\Columns\TextColumn::make('name')->label('Nama Alat')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('lab.name')->label('Laboratorium')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('total_quantity')->label('Total')->sortable(),
+                Tables\Columns\TextColumn::make('available_quantity')->label('Tersedia')->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('lab_id')
@@ -63,11 +59,21 @@ class ToolResource extends Resource
                     ->relationship('lab', 'name'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),
+                Tables\Actions\Action::make('book')
+                    ->label('Book')
+                    ->icon('heroicon-o-plus-circle')
+                    ->url(fn($record) => route('filament.super-admin.resources.tool-bookings.create', [
+                        'tool_id' => $record->id,
+                    ]))
+                    ->visible(fn() => auth()->user()->hasRole('pengguna')),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),
             ]);
     }
 

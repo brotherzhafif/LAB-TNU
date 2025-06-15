@@ -8,7 +8,8 @@ use Filament\Pages\Page;
 
 class KalenderPeminjaman extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar';
+    protected static ?int $navigationSort = 60; // Kalender paling bawah
     protected static string $view = 'filament.pages.kalender-peminjaman';
     protected static ?string $title = 'Kalender Pemakaian Lab & Alat';
 
@@ -27,7 +28,8 @@ class KalenderPeminjaman extends Page
                     'end' => $booking->tanggal . 'T' . $booking->waktu_selesai,
                     'color' => '#1d4ed8', // biru
                 ];
-            });
+            })
+            ->toArray(); // Convert to array
 
         // Event pemakaian alat
         $toolEvents = ToolBooking::with('tool', 'user')
@@ -40,9 +42,10 @@ class KalenderPeminjaman extends Page
                     'end' => $booking->tanggal . 'T' . $booking->waktu_selesai,
                     'color' => '#059669', // hijau
                 ];
-            });
+            })
+            ->toArray(); // Convert to array
 
         // Gabungkan jadi satu array
-        $this->events = $labEvents->merge($toolEvents)->values()->toArray();
+        $this->events = array_merge($labEvents, $toolEvents);
     }
 }

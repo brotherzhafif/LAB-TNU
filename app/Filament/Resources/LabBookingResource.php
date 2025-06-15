@@ -18,10 +18,13 @@ class LabBookingResource extends Resource
 {
     protected static ?string $model = LabBooking::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+
+    protected static ?int $navigationSort = 30; // Lab Bookings setelah Tools
 
     public static function form(Form $form): Form
     {
+        $labId = request()->get('lab_id');
         return $form->schema([
             Forms\Components\Hidden::make('user_id')->default(auth()->id()),
             Forms\Components\TextInput::make('nama_pengguna')
@@ -44,10 +47,8 @@ class LabBookingResource extends Resource
                 ->label('Laboratorium')
                 ->relationship('lab', 'name')
                 ->required()
-                ->disabled(
-                    fn($record) => !auth()->user()->hasRole('pengguna') ||
-                    ($record && $record->status !== 'pending')
-                ),
+                ->default($labId)
+                ->disabled(fn() => filled($labId) || !auth()->user()->hasRole('pengguna') || (request()->route('record') && request()->route('record')->status !== 'pending')),
 
             Forms\Components\TextInput::make('course')
                 ->label('Course / Mata Kuliah')
@@ -129,11 +130,10 @@ class LabBookingResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('nama_pengguna')->label('Nama Pengguna')->searchable(),
-                Tables\Columns\TextColumn::make('nit_nip')->label('NIT/NIP')->searchable(),
-                Tables\Columns\TextColumn::make('user.name')->label('Pengguna'),
-                Tables\Columns\TextColumn::make('lab.name')->label('Lab')->searchable(),
-                Tables\Columns\TextColumn::make('tanggal')->date('d M Y')->searchable(),
+                Tables\Columns\TextColumn::make('nama_pengguna')->label('Nama Pengguna')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('nit_nip')->label('NIT/NIP')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('lab.name')->label('Lab')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('tanggal')->date('d M Y')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('waktu_mulai'),
                 Tables\Columns\TextColumn::make('waktu_selesai'),
                 Tables\Columns\BadgeColumn::make('status')
@@ -143,13 +143,13 @@ class LabBookingResource extends Resource
                         'danger' => 'rejected',
                         'success' => 'completed',
                     ]),
-
             ])
             ->actions([
+                // Hanya admin/operator yang bisa edit/delete/selesai
                 Tables\Actions\EditAction::make()
-                    ->visible(fn($record) => $record->status === 'pending'),
+                    ->visible(fn() => !auth()->user()->hasRole('pengguna')),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn($record) => $record->status === 'pending'),
+                    ->visible(fn() => !auth()->user()->hasRole('pengguna')),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')
                     ->icon('heroicon-m-check-circle')

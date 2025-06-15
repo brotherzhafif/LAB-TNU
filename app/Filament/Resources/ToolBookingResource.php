@@ -17,10 +17,13 @@ class ToolBookingResource extends Resource
 {
     protected static ?string $model = ToolBooking::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+
+    protected static ?int $navigationSort = 40; // Tool Bookings setelah Lab Bookings
 
     public static function form(Form $form): Form
     {
+        $toolId = request()->get('tool_id');
         return $form->schema([
             Forms\Components\TextInput::make('nama_pengguna')
                 ->label('Nama Pengguna')
@@ -43,11 +46,9 @@ class ToolBookingResource extends Resource
                 ->label('Nama Alat')
                 ->relationship('tool', 'name')
                 ->required()
-                ->reactive()
-                ->disabled(
-                    fn($record) => !auth()->user()->hasRole('pengguna') ||
-                    ($record && $record->status !== 'pending')
-                ),
+                ->default($toolId)
+                ->disabled(fn() => filled($toolId) || !auth()->user()->hasRole('pengguna') || (request()->route('record') && request()->route('record')->status !== 'pending'))
+                ->reactive(),
 
             Forms\Components\TextInput::make('course')
                 ->label('Course / Mata Kuliah')
@@ -93,7 +94,7 @@ class ToolBookingResource extends Resource
                     if (!$toolId)
                         return [];
                     $max = \App\Models\Tool::find($toolId)?->available_quantity ?? 0;
-                    // Saat edit, pastikan jumlah yang sudah dipilih tetap ada di opsi
+
                     $current = $record ? $record->jumlah : null;
                     $range = $max > 0 ? range(1, $max) : [];
                     if ($current && !in_array($current, $range)) {
@@ -119,7 +120,7 @@ class ToolBookingResource extends Resource
                         'approved' => 'Approved',
                         'rejected' => 'Rejected',
                     ];
-                    // Jika status completed, tampilkan juga completed
+
                     if (($record && $record->status === 'completed') || $get('status') === 'completed') {
                         $options['completed'] = 'Completed';
                     }
@@ -176,9 +177,17 @@ class ToolBookingResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->visible(fn($record) => $record->status === 'pending'),
+                    ->visible(
+                        fn($record) =>
+                        $record->status === 'pending'
+                        && auth()->user()->hasRole('pengguna')
+                    ),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn($record) => $record->status === 'pending'),
+                    ->visible(
+                        fn($record) =>
+                        $record->status === 'pending'
+                        && auth()->user()->hasRole('pengguna')
+                    ),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')
                     ->icon('heroicon-m-check-circle')
