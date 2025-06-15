@@ -14,6 +14,7 @@ class DashboardStatusAlatLab extends BaseWidget
 {
     protected static ?int $sort = 1;
 
+
     public static function canView(): bool
     {
         return Auth::user()->hasRole('pengguna');
