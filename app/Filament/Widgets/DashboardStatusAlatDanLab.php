@@ -10,7 +10,7 @@ use App\Models\LabBooking;
 use App\Models\ToolBooking;
 use Illuminate\Support\Facades\Auth;
 
-class DashboardStatusAlatLab extends BaseWidget
+class DashboardStatusAlatDanLab extends BaseWidget
 {
     protected static ?int $sort = 1;
 
@@ -44,16 +44,22 @@ class DashboardStatusAlatLab extends BaseWidget
         return $table
             ->query($this->getTableQuery())
             ->columns([
-                Tables\Columns\TextColumn::make('tipe')->label('Tipe'),
-                Tables\Columns\TextColumn::make('nama')->label('Nama'),
-                Tables\Columns\TextColumn::make('lokasi')->label('Lokasi'),
+                Tables\Columns\TextColumn::make('tipe')->label('Tipe')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('lokasi')->label('Lokasi')->sortable()->searchable(),
                 Tables\Columns\BadgeColumn::make('status')->label('Status')
                     ->colors([
                         'success' => 'Kosong',
                         'danger' => 'Dipinjam',
-                    ]),
+                    ])->sortable()->searchable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('tipe')
+                    ->label('Tipe')
+                    ->options([
+                        'Lab' => 'Lab',
+                        'Alat' => 'Alat',
+                    ]),
                 Tables\Filters\Filter::make('tanggal')
                     ->label('Tanggal')
                     ->form([

@@ -39,6 +39,7 @@ class SuperAdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                \App\Filament\Widgets\GrafikPeminjaman::class,
                 \App\Filament\Widgets\DashboardRingkasan::class,
             ])
 
