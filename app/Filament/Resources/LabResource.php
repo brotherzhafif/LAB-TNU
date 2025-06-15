@@ -52,6 +52,18 @@ class LabResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('location')
+                    ->label('Lokasi')
+                    ->options(
+                        Lab::query()
+                            ->select('location')
+                            ->distinct()
+                            ->pluck('location', 'location')
+                            ->filter() // menghapus nilai NULL
+                            ->toArray()
+                    )
+            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin'])),

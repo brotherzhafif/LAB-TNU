@@ -140,7 +140,9 @@ class ToolBookingResource extends Resource
                         $excludeId = $record ? $record->id : null;
                         if ($toolId && $tanggal && $mulai && $selesai) {
                             if (\App\Models\ToolBooking::isConflict($toolId, $tanggal, $mulai, $selesai, $excludeId)) {
-                                throw \Filament\Forms\Exception\ComponentException::make('Waktu peminjaman alat bentrok dengan booking lain.');
+                                throw \Illuminate\Validation\ValidationException::withMessages([
+                                    'tanggal' => 'Waktu peminjaman alat bentrok dengan booking lain.',
+                                ]);
                             }
                         }
                     }),

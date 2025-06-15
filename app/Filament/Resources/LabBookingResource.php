@@ -99,7 +99,7 @@ class LabBookingResource extends Resource
                         $excludeId = $record ? $record->id : null;
                         if ($labId && $tanggal && $mulai && $selesai) {
                             if (\App\Models\LabBooking::isConflict($labId, $tanggal, $mulai, $selesai, $excludeId)) {
-                                throw \Filament\Forms\Components\ComponentException::make('Waktu peminjaman lab bentrok dengan booking lain.');
+                                throw new \Exception('Waktu peminjaman lab bentrok dengan booking lain.');
                             }
                         }
                     }),
@@ -144,6 +144,14 @@ class LabBookingResource extends Resource
                         'success' => 'completed',
                     ]),
             ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                    'completed' => 'Completed',
+                ]),
+            ])
             ->actions([
                 // Hanya admin/operator yang bisa edit/delete/selesai
                 Tables\Actions\EditAction::make()
@@ -152,6 +160,7 @@ class LabBookingResource extends Resource
                     ->visible(fn() => !auth()->user()->hasRole('pengguna')),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')
+                    ->color('success')
                     ->icon('heroicon-m-check-circle')
                     ->url(fn($record) => route('filament.super-admin.resources.lab-bookings.selesai-peminjaman-lab', ['record' => $record->id]))
                     ->visible(
