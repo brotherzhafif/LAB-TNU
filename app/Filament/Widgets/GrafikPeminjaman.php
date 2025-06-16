@@ -10,34 +10,87 @@ use Illuminate\Support\Facades\Auth;
 
 class GrafikPeminjaman extends ChartWidget
 {
-    protected static ?string $heading = 'Grafik Peminjaman Bulanan';
+    protected static ?string $heading = 'Grafik Peminjaman';
     protected static ?int $sort = 2;
+
+    public ?string $filterPeriode = 'bulan';
+    public ?string $filterTanggal = null;
+
+    protected static array $periodOptions = [
+        'hari' => 'Hari',
+        'bulan' => 'Bulan',
+        'tahun' => 'Tahun',
+    ];
 
     public static function canView(): bool
     {
         return Auth::user()->hasRole(['admin', 'superadmin']);
     }
+
+    protected function getFormSchema(): array
+    {
+        return [
+            \Filament\Forms\Components\Select::make('filterPeriode')
+                ->label('Periode')
+                ->options(self::$periodOptions)
+                ->default('bulan')
+                ->reactive(),
+            \Filament\Forms\Components\DatePicker::make('filterTanggal')
+                ->label('Tanggal')
+                ->default(now()->toDateString())
+                ->reactive(),
+        ];
+    }
+
     protected function getData(): array
     {
+        $periode = $this->filterPeriode ?? 'bulan';
+        $tanggal = $this->filterTanggal ?? now()->toDateString();
+
         $labels = [];
         $labData = [];
         $toolData = [];
 
-        // Ambil data 6 bulan terakhir
-        for ($i = 5; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $labels[] = $month->format('M Y');
+        if ($periode === 'hari') {
+            // 7 hari terakhir
+            for ($i = 6; $i >= 0; $i--) {
+                $date = \Carbon\Carbon::parse($tanggal)->subDays($i);
+                $labels[] = $date->format('d M Y');
 
-            $labCount = LabBooking::whereYear('tanggal', $month->year)
-                ->whereMonth('tanggal', $month->month)
-                ->count();
+                $labCount = \App\Models\LabBooking::whereDate('tanggal', $date)->count();
+                $toolCount = \App\Models\ToolBooking::whereDate('tanggal', $date)->count();
 
-            $toolCount = ToolBooking::whereYear('tanggal', $month->year)
-                ->whereMonth('tanggal', $month->month)
-                ->count();
+                $labData[] = $labCount;
+                $toolData[] = $toolCount;
+            }
+        } elseif ($periode === 'bulan') {
+            // 6 bulan terakhir
+            for ($i = 5; $i >= 0; $i--) {
+                $month = \Carbon\Carbon::parse($tanggal)->subMonths($i);
+                $labels[] = $month->format('M Y');
 
-            $labData[] = $labCount;
-            $toolData[] = $toolCount;
+                $labCount = \App\Models\LabBooking::whereYear('tanggal', $month->year)
+                    ->whereMonth('tanggal', $month->month)
+                    ->count();
+                $toolCount = \App\Models\ToolBooking::whereYear('tanggal', $month->year)
+                    ->whereMonth('tanggal', $month->month)
+                    ->count();
+
+                $labData[] = $labCount;
+                $toolData[] = $toolCount;
+            }
+        } elseif ($periode === 'tahun') {
+            // 6 tahun terakhir
+            for ($i = 5; $i >= 0; $i--) {
+                $year = \Carbon\Carbon::parse($tanggal)->subYears($i)->year;
+                $labels[] = (string) $year;
+
+                $labCount = \App\Models\LabBooking::whereYear('tanggal', $year)->count();
+                $toolCount = \App\Models\ToolBooking::whereYear('tanggal', $year)->count();
+
+                $labData[] = $labCount;
+                $toolData[] = $toolCount;
+            }
         }
 
         return [
@@ -63,6 +116,6 @@ class GrafikPeminjaman extends ChartWidget
 
     protected function getType(): string
     {
-        return 'bar'; // Bisa diganti: 'bar', 'line', 'doughnut', etc.
+        return 'bar';
     }
 }

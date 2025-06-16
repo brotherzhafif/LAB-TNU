@@ -1,21 +1,18 @@
 <x-filament-widgets::widget>
     <x-filament::section>
-        {{-- Filter Periode --}}
-        <div class="flex flex-col md:flex-row gap-4 mb-4">
-            <div>
-                <label class="block text-sm font-semibold mb-1">Periode</label>
-                <select wire:model="filterPeriode" class="filament-input rounded-lg">
-                    <option value="hari">Hari</option>
-                    <option value="bulan">Bulan</option>
-                    <option value="tahun">Tahun</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-semibold mb-1">Tanggal</label>
-                <input type="date" wire:model="filterTanggal" class="filament-input rounded-lg" />
-            </div>
-        </div>
+        {{-- Filter Section --}}
+        @if (method_exists($this, 'getFormSchema') && count($this->getFormSchema()))
+            <form wire:submit.prevent="filter" class="flex flex-wrap gap-2 mb-4">
+                <div>
+                    <x-filament::form wire:submit.prevent>
+                        @foreach ($this->getFormSchema() as $field)
+                            {!! $field->render() !!}
+                        @endforeach
+                    </x-filament::form>
+                </div>
+            </form>
+        @endif
+        {{-- Statistik akan otomatis berubah sesuai filter di atas --}}
         {{-- Widget content --}}
-        {{-- Statistik akan otomatis berubah sesuai filter --}}
     </x-filament::section>
 </x-filament-widgets::widget>
