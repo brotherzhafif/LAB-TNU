@@ -16,6 +16,10 @@
             "dest": "/public/$1/filament/$2"
         },
         {
+            "src": "/livewire/update",
+            "dest": "/api/index.php"
+        },
+        {
             "src": "/livewire/(.*)",
             "dest": "/public/vendor/livewire/$1"
         },
