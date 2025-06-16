@@ -16,10 +16,6 @@
             "dest": "/public/$1/filament/$2"
         },
         {
-            "src": "/(.*)",
-            "dest": "/api/index.php"
-        },
-        {
             "src": "/livewire/(.*)",
             "dest": "/public/vendor/livewire/$1"
         },
@@ -30,14 +26,18 @@
         {
             "src": "/favicon.ico",
             "dest": "/public/favicon.ico"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
         }
     ],
     "env": {
         "APP_NAME": "Manajemen LAB TNU",
-        "APP_ENV": "production",
+        "APP_ENV": "local",
         "APP_KEY": "base64:Myxg7qadJQyZraQ/BQvJBKcNNY9KHSc1QwxrqdMsHy0=",
         "APP_DEBUG": "true",
-        "APP_URL": "https://lab-tnu.vercel.app",
+        "APP_URL": "https://lab-tnu.vercel.app/",
         "DB_CONNECTION": "mysql",
         "DB_HOST": "mysql-1b5e9ef1-bangz1504-4a73.b.aivencloud.com",
         "DB_PORT": "17598",
@@ -51,9 +51,7 @@
         "APP_SERVICES_CACHE": "/tmp/services.php",
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_DRIVER": "array",
-        "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "database",
-        "SESSION_SECURE_COOKIE": "true"
+        "LOG_CHANNEL": "stderr"
     },
     "outputDirectory": "public"
 }
