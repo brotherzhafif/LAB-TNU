@@ -111,11 +111,6 @@ class ToolBookingResource extends Resource
                 ->default(fn($record) => $record ? $record->jumlah : null)
                 ->disabled(fn($record) => !auth()->user()->hasRole('pengguna')),
 
-            Forms\Components\ViewField::make('bukti_selesai_preview')
-                ->label('Bukti Selesai')
-                ->view('filament.components.bukti-selesai-preview')
-                ->hidden(fn($record) => !$record),
-
             Forms\Components\Select::make('status')
                 ->options(function ($get, $record) {
                     $options = [
@@ -130,26 +125,15 @@ class ToolBookingResource extends Resource
                     return $options;
                 })
                 ->default('pending')
-                ->hidden(fn() => auth()->user()->hasRole('pengguna'))
-                ->disabled(fn($record) => $record && $record->status === 'completed'),
+                ->disabled(fn($record) => $record && $record->status === 'completed' ||
+                    auth()->user()->hasRole('pengguna')),
 
-            Forms\Components\Section::make()
-                ->schema([
-                    Forms\Components\Hidden::make('conflict_check')->afterStateUpdated(function ($state, callable $set, callable $get, $record) {
-                        $toolId = $get('tool_id');
-                        $tanggal = $get('tanggal');
-                        $mulai = $get('waktu_mulai');
-                        $selesai = $get('waktu_selesai');
-                        $excludeId = $record ? $record->id : null;
-                        if ($toolId && $tanggal && $mulai && $selesai) {
-                            if (\App\Models\ToolBooking::isConflict($toolId, $tanggal, $mulai, $selesai, $excludeId)) {
-                                throw \Illuminate\Validation\ValidationException::withMessages([
-                                    'tanggal' => 'Waktu peminjaman alat bentrok dengan booking lain.',
-                                ]);
-                            }
-                        }
-                    }),
-                ]),
+            Forms\Components\ViewField::make('bukti_selesai_preview')
+                ->label('Bukti Selesai')
+                ->view('filament.components.bukti-selesai-preview')
+                ->hidden(fn($record) => !$record),
+
+
         ]);
     }
 

@@ -87,25 +87,12 @@ class LabBookingResource extends Resource
                             fn($record) => !auth()->user()->hasRole('pengguna') ||
                             ($record && $record->status !== 'pending')
                         ),
-                ])
-                ->afterStateHydrated(function ($component, $state) {
-                    // ...existing code...
-                }),
-            Forms\Components\Section::make()
-                ->schema([
-                    Forms\Components\Hidden::make('conflict_check')->afterStateUpdated(function ($state, callable $set, callable $get, $record) {
-                        $labId = $get('lab_id');
-                        $tanggal = $get('tanggal');
-                        $mulai = $get('waktu_mulai');
-                        $selesai = $get('waktu_selesai');
-                        $excludeId = $record ? $record->id : null;
-                        if ($labId && $tanggal && $mulai && $selesai) {
-                            if (\App\Models\LabBooking::isConflict($labId, $tanggal, $mulai, $selesai, $excludeId)) {
-                                throw new \Exception('Waktu peminjaman lab bentrok dengan booking lain.');
-                            }
-                        }
-                    }),
                 ]),
+
+            Forms\Components\ViewField::make('bukti_selesai_preview')
+                ->label('Bukti Selesai')
+                ->view('filament.components.bukti-selesai-preview')
+                ->hidden(fn($record) => !$record),
 
             Forms\Components\Select::make('status')
                 ->options(function ($get, $record) {
@@ -121,11 +108,8 @@ class LabBookingResource extends Resource
                     return $options;
                 })
                 ->default('pending')
-                ->hidden(
-                    fn($record) =>
-                    auth()->user()->hasRole('pengguna')
-                )
-                ->disabled(fn($record) => $record && $record->status === 'completed'),
+                ->disabled(fn($record) => $record && $record->status === 'completed' ||
+                    auth()->user()->hasRole('pengguna')),
         ]);
     }
     public static function table(Table $table): Table
