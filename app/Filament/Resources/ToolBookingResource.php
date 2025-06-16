@@ -109,7 +109,10 @@ class ToolBookingResource extends Resource
                 ->required()
                 ->reactive()
                 ->default(fn($record) => $record ? $record->jumlah : null)
-                ->disabled(fn($record) => !auth()->user()->hasRole('pengguna')),
+                ->disabled(
+                    fn($record) =>
+                    ($record && $record->status !== 'pending')
+                ),
 
             Forms\Components\Select::make('status')
                 ->options(function ($get, $record) {
