@@ -60,6 +60,18 @@ class DashboardRingkasan extends BaseWidget
                 $labBookingQuery->whereYear('tanggal', date('Y', strtotime($tanggal)));
                 $toolBookingQuery->whereYear('tanggal', date('Y', strtotime($tanggal)));
             }
+
+            $labCount = $labBookingQuery->count();
+            $toolCount = $toolBookingQuery->count();
+
+            return [
+                Stat::make('Peminjaman Lab', $labCount)
+                    ->description("Total peminjaman lab ($periode)")
+                    ->color('primary'),
+                Stat::make('Peminjaman Alat', $toolCount)
+                    ->description("Total peminjaman alat ($periode)")
+                    ->color('success'),
+            ];
         }
 
         return [];
