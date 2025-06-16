@@ -17,7 +17,7 @@ class ToolBookingSelesaiController extends Controller
             'bukti_selesai' => 'required|image|max:2048',
         ]);
 
-        $path = $request->file('bukti_selesai')->store('bukti-alat', 'public');
+        $path = $request->file('bukti_selesai')->store('bukti-alat', 's3');
 
         $booking->bukti_selesai = $path;
         $booking->status = 'completed';
