@@ -47,7 +47,10 @@ class ToolBookingResource extends Resource
                 ->relationship('tool', 'name')
                 ->required()
                 ->default($toolId)
-                ->disabled(fn() => filled($toolId) || !auth()->user()->hasRole('pengguna') || (request()->route('record') && request()->route('record')->status !== 'pending'))
+                ->disabled(
+                    fn($record) => !auth()->user()->hasRole('pengguna') ||
+                    ($record && $record->status !== 'pending')
+                )
                 ->reactive(),
 
             Forms\Components\TextInput::make('course')

@@ -48,8 +48,10 @@ class LabBookingResource extends Resource
                 ->relationship('lab', 'name')
                 ->required()
                 ->default($labId)
-                ->disabled(fn() => filled($labId) || !auth()->user()->hasRole('pengguna') || (request()->route('record') && request()->route('record')->status !== 'pending')),
-
+                ->disabled(
+                    fn($record) => !auth()->user()->hasRole('pengguna') ||
+                    ($record && $record->status !== 'pending')
+                ),
             Forms\Components\TextInput::make('course')
                 ->label('Course / Mata Kuliah')
                 ->disabled(
