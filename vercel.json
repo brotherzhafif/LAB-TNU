@@ -18,6 +18,18 @@
         {
             "src": "/(.*)",
             "dest": "/api/index.php"
+        },
+        {
+            "src": "/livewire/(.*)",
+            "dest": "/public/vendor/livewire/$1"
+        },
+        {
+            "src": "/storage/(.*)",
+            "dest": "/public/storage/$1"
+        },
+        {
+            "src": "/favicon.ico",
+            "dest": "/public/favicon.ico"
         }
     ],
     "env": {
