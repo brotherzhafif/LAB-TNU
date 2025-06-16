@@ -21,10 +21,10 @@ class DashboardLogAktivitas extends BaseWidget
 
     protected function getTableQuery(): Builder
     {
-        $collation = 'utf8mb4_unicode_ci';
+        // $collation = 'utf8mb4_unicode_ci';
 
         $lab = \DB::table('lab_bookings')->selectRaw("
-            CAST('Lab' AS CHAR CHARACTER SET utf8mb4 COLLATE $collation) AS tipe,
+            'Lab' AS tipe,
             id,
             user_id,
             lab_id,
@@ -32,12 +32,12 @@ class DashboardLogAktivitas extends BaseWidget
             tanggal,
             waktu_mulai,
             waktu_selesai,
-            CAST(status AS CHAR CHARACTER SET utf8mb4 COLLATE $collation) AS status,
+            status,
             created_at
         ");
 
         $tool = \DB::table('tool_bookings')->selectRaw("
-            CAST('Alat' AS CHAR CHARACTER SET utf8mb4 COLLATE $collation) AS tipe,
+            'Alat' AS tipe,
             id,
             user_id,
             NULL AS lab_id,
@@ -45,10 +45,9 @@ class DashboardLogAktivitas extends BaseWidget
             tanggal,
             waktu_mulai,
             waktu_selesai,
-            CAST(status AS CHAR CHARACTER SET utf8mb4 COLLATE $collation) AS status,
+            status,
             created_at
         ");
-
 
         // Union kedua tabel (Query\Builder)
         $union = $lab->unionAll($tool);
