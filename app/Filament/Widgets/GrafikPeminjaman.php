@@ -15,11 +15,18 @@ class GrafikPeminjaman extends ChartWidget
 
     public ?string $filterPeriode = 'bulan';
     public ?string $filterTanggal = null;
+    public ?string $filterTipeGrafik = 'bar'; // Tambah properti tipe grafik
 
     protected static array $periodOptions = [
         'hari' => 'Hari',
         'bulan' => 'Bulan',
         'tahun' => 'Tahun',
+    ];
+
+    protected static array $chartTypeOptions = [
+        'bar' => 'Bar',
+        'line' => 'Line',
+        'pie' => 'Pie',
     ];
 
     public static function canView(): bool
@@ -38,6 +45,11 @@ class GrafikPeminjaman extends ChartWidget
             \Filament\Forms\Components\DatePicker::make('filterTanggal')
                 ->label('Tanggal')
                 ->default(now()->toDateString())
+                ->reactive(),
+            \Filament\Forms\Components\Select::make('filterTipeGrafik')
+                ->label('Tipe Grafik')
+                ->options(self::$chartTypeOptions)
+                ->default('bar')
                 ->reactive(),
         ];
     }
@@ -116,6 +128,6 @@ class GrafikPeminjaman extends ChartWidget
 
     protected function getType(): string
     {
-        return 'bar';
+        return $this->filterTipeGrafik ?? 'bar';
     }
 }
