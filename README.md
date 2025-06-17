@@ -18,6 +18,8 @@ Aplikasi ini adalah sistem informasi untuk mengelola peminjaman laboratorium dan
 
 ## Cara Instalasi
 
+> Jalankan Semua ini Di Terminal
+
 1. **Install Dependency**
 
     ```
@@ -45,13 +47,19 @@ Aplikasi ini adalah sistem informasi untuk mengelola peminjaman laboratorium dan
         - Monitor: `monitor@labtnu.test` / `password`
         - Pengguna: `pengguna@labtnu.test` / `password`
 
-4. **Jalankan Server**
+4. **Buat Environtmen**
+
+    ```
+    copy .env.example .env
+    ```
+
+5. **Jalankan Server**
 
     ```
     php artisan serve
     ```
 
-5. **Akses Aplikasi**
+6. **Akses Aplikasi**
     - Buka browser ke `http://localhost:8000/Lab-TNU`
     - Login sesuai role.
 
