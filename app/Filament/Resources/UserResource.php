@@ -31,6 +31,13 @@ class UserResource extends Resource
             TextInput::make('name')->label('Nama')->required(),
             TextInput::make('nit_nip')->label('NIT/NIP')->required(),
             TextInput::make('email')->label('Email')->email()->required(),
+            TextInput::make('password')
+                ->label('Kata Sandi')
+                ->password()
+                ->required(fn(?User $record) => !$record)
+                ->minLength(8)
+                ->dehydrateStateUsing(fn($state) => bcrypt($state))
+                ->visible(fn(?User $record) => !$record || $record->isDirty('password')),
             Select::make('roles')
                 ->label('Role')
                 ->relationship('roles', 'name')
