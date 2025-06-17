@@ -21,8 +21,7 @@ return new class extends Migration {
             $table->time('waktu_selesai');
             $table->integer('jumlah'); // jumlah alat yang dipinjam
             $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
-            // Ubah kolom bukti_selesai agar bisa menyimpan banyak file (array JSON path gambar)
-            $table->json('bukti_selesai')->nullable(); // sekarang json, bukan varchar
+            $table->string('bukti_selesai')->nullable(); // ubah dari json ke string
             $table->timestamps();
         });
     }

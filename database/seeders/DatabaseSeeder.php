@@ -15,16 +15,12 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User']
-        );
+        // User::firstOrCreate(
+        //     ['email' => 'superadmin@labtnu.com'],
+        //     ['name' => 'Super Admin', 'password' => bcrypt('superadmin')]
+        // );
         $this->call([
             RolePermissionSeeder::class,
-            LabSeeder::class,
-            ToolSeeder::class,
-            LabBookingSeeder::class,
-            ToolBookingSeeder::class,
         ]);
     }
 }
