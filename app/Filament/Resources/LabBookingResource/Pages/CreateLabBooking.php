@@ -15,6 +15,8 @@ class CreateLabBooking extends CreateRecord
     {
         if (auth()->user()->hasRole('pengguna')) {
             $data['user_id'] = auth()->id();
+            $data['nit_nip'] = auth()->user()->nit_nip; // autofill nit_nip
+            $data['nama_pengguna'] = auth()->user()->name; // autofill nama_pengguna
         }
         // Prefill lab_id if present in query string
         if (request()->has('lab_id')) {

@@ -29,6 +29,7 @@ class UserResource extends Resource
     {
         return $form->schema([
             TextInput::make('name')->label('Nama')->required(),
+            TextInput::make('nit_nip')->label('NIT/NIP')->required(),
             TextInput::make('email')->label('Email')->email()->required(),
             Select::make('roles')
                 ->label('Role')
@@ -44,6 +45,7 @@ class UserResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->label('Nama')->searchable()->sortable(),
+                TextColumn::make('nit_nip')->label('NIT/NIP')->searchable()->sortable(),
                 TextColumn::make('email')->label('Email')->searchable()->sortable(),
                 BadgeColumn::make('roles.name')->label('Role')->colors([
                     'primary' => 'superadmin',

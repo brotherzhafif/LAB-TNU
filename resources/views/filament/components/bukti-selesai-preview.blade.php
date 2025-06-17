@@ -52,8 +52,8 @@
             <button type="button" class="bukti-frame-btn" id="zoom-in">+</button>
             <button type="button" class="bukti-frame-btn" id="zoom-out">−</button>
         </div>
-        <img src="{{ Storage::disk('s3')->url($getRecord()->bukti_selesai) }}" alt="Bukti Selesai" id="bukti-frame-img"
-            class="bukti-frame-img" style="transform: scale(1);">
+        <img src="{{ Storage::disk(config('filesystems.default'))->url($getRecord()->bukti_selesai) }}" alt="Bukti Selesai"
+            id="bukti-frame-img" class="bukti-frame-img" style="transform: scale(1);">
     </div>
     <script>
         const img = document.getElementById('bukti-frame-img');

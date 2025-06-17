@@ -14,6 +14,8 @@ class CreateToolBooking extends CreateRecord
     {
         if (auth()->user()->hasRole('pengguna')) {
             $data['user_id'] = auth()->id();
+            $data['nit_nip'] = auth()->user()->nit_nip; // autofill nit_nip
+            $data['nama_pengguna'] = auth()->user()->name; // autofill nama_pengguna
         }
         // Prefill tool_id if present in query string
         if (request()->has('tool_id')) {

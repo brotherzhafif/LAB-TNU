@@ -17,7 +17,7 @@ class LabBookingSelesaiController extends Controller
             'bukti_selesai' => 'required|image|max:2048',
         ]);
 
-        $path = $request->file('bukti_selesai')->store('bukti-lab', 's3');
+        $path = $request->file('bukti_selesai')->store('bukti-lab', env('FILESYSTEM_DISK', 'local'));
 
         $booking->bukti_selesai = $path;
         $booking->status = 'completed';

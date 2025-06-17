@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use League\CommonMark\Environment\Environment;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Force HTTPS in production
-        \URL::forceScheme('https');
+        if (config('app.url') == 'https://lab-tnu.vercel.app/') {
+            \URL::forceScheme('https');
+        }
     }
 }
