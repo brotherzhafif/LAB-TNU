@@ -1,9 +1,9 @@
 * text=auto eol=lf
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
+*.blade.php export-ignore
+*.css export-ignore
+*.html export-ignore
+*.md export-ignore
 *.php diff=php
 
 /.github export-ignore

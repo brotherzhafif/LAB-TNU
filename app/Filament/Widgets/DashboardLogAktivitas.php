@@ -130,6 +130,13 @@ class DashboardLogAktivitas extends BaseWidget
                         }
                     })
             ])
-            ->searchable();
+            ->searchable()
+            ->headerActions([
+                Tables\Actions\Action::make('export')
+                    ->label('Export ke Excel')
+                    ->url(route('export-log-aktivitas'))
+                    ->openUrlInNewTab()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'superadmin', 'monitor'])),
+            ]);
     }
 }
