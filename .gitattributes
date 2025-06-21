@@ -1,6 +1,6 @@
 * text=auto eol=lf
 
-*.blade.php export-ignore
+*.blade.php diff=php
 *.css export-ignore
 *.html export-ignore
 *.md export-ignore
