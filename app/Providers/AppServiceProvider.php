@@ -23,6 +23,13 @@ class AppServiceProvider extends ServiceProvider
         // Force HTTPS in production
         if (config('app.url') == 'https://lab-tnu.vercel.app/') {
             \URL::forceScheme('https');
+
+            config([
+                'excel.exports.temp_path' => '/tmp',
+                'filesystems.disks.local.root' => '/tmp',
+                'view.compiled' => '/tmp',
+                'cache.stores.file.path' => '/tmp',
+            ]);
         }
     }
 }

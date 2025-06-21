@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Exports\LogAktivitasExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 
 class ExportLogAktivitasController extends Controller
@@ -40,6 +38,30 @@ class ExportLogAktivitasController extends Controller
         $union = $lab->unionAll($tool);
         $logs = DB::query()->fromSub($union, 'logs')->orderByDesc('created_at')->get();
 
-        return Excel::download(new LogAktivitasExport($logs), 'log-aktivitas.xlsx');
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="log-aktivitas.csv"',
+        ];
+
+        $callback = function () use ($logs) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Tipe', 'Nama Pengguna', 'Lab', 'Alat', 'Tanggal', 'Mulai', 'Selesai', 'Status', 'Dibuat']);
+            foreach ($logs as $log) {
+                fputcsv($handle, [
+                    $log->tipe,
+                    optional(\App\Models\User::find($log->user_id))->name,
+                    $log->lab_id ? optional(\App\Models\Lab::find($log->lab_id))->name : '-',
+                    $log->tool_id ? optional(\App\Models\Tool::find($log->tool_id))->name : '-',
+                    $log->tanggal,
+                    $log->waktu_mulai,
+                    $log->waktu_selesai,
+                    $log->status,
+                    $log->created_at,
+                ]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
