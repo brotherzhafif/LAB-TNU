@@ -41,9 +41,11 @@ class SuperAdminPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
                 \App\Filament\Widgets\GrafikPeminjaman::class,
                 \App\Filament\Widgets\DashboardRingkasan::class,
+                \App\Filament\Widgets\DashboardStatusLab::class,
+                \App\Filament\Widgets\DashboardStatusAlat::class,
+                \App\Filament\Widgets\DashboardLogAktivitasAlat::class,
+                \App\Filament\Widgets\DashboardLogAktivitasLab::class,
             ])
-
-
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

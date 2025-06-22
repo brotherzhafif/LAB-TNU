@@ -20,10 +20,10 @@ class ToolBookingSelesaiController extends Controller
         $path = $request->file('bukti_selesai')->store('bukti-alat', env('FILESYSTEM_DISK', 'local'));
 
         $booking->bukti_selesai = $path;
-        $booking->status = 'completed';
+        $booking->status = 'returning'; // Changed from 'completed' to 'returning'
         $booking->save();
 
         return redirect()->route('filament.super-admin.resources.tool-bookings.index')
-            ->with('success', 'Peminjaman alat berhasil diselesaikan.');
+            ->with('success', 'Peminjaman alat berhasil diselesaikan dan menunggu verifikasi admin.');
     }
 }

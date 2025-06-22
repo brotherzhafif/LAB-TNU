@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->time('waktu_mulai');
             $table->time('waktu_selesai');
             $table->integer('jumlah');
-            $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'returning', 'completed'])->default('pending');
             $table->string('bukti_selesai')->nullable();
             $table->timestamps();
         });

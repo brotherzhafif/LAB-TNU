@@ -121,9 +121,19 @@ class ToolBookingResource extends Resource
                         'approved' => 'Approved',
                         'rejected' => 'Rejected',
                     ];
-
-                    if (($record && $record->status === 'completed') || $get('status') === 'completed') {
+                    // Jika status completed, tampilkan juga completed
+                    if (
+                        ($record && in_array($record->status, ['completed'])) ||
+                        in_array($get('status'), ['completed'])
+                    ) {
                         $options['completed'] = 'Completed';
+                    }
+                    // Jika status returning, tampilkan juga returning
+                    if (
+                        ($record && in_array($record->status, ['returning'])) ||
+                        in_array($get('status'), ['returning'])
+                    ) {
+                        $options['returning'] = 'Returning';
                     }
                     return $options;
                 })
@@ -157,6 +167,7 @@ class ToolBookingResource extends Resource
                         'warning' => 'pending',
                         'info' => 'approved',
                         'danger' => 'rejected',
+                        'primary' => 'returning',
                         'success' => 'completed',
                     ]),
             ])
@@ -165,6 +176,7 @@ class ToolBookingResource extends Resource
                     'pending' => 'Pending',
                     'approved' => 'Approved',
                     'rejected' => 'Rejected',
+                    'returning' => 'Returning',
                     'completed' => 'Completed',
                 ]),
             ])
@@ -192,6 +204,19 @@ class ToolBookingResource extends Resource
                         fn($record) =>
                         auth()->user()->hasRole('pengguna') &&
                         $record->status === 'approved'
+                    ),
+                Tables\Actions\Action::make('complete')
+                    ->label('Verifikasi Selesai')
+                    ->color('success')
+                    ->icon('heroicon-m-check-badge')
+                    ->action(function ($record) {
+                        $record->status = 'completed';
+                        $record->save();
+                    })
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole(['admin', 'superadmin']) &&
+                        $record->status === 'returning'
                     ),
             ]);
     }

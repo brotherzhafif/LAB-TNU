@@ -102,8 +102,18 @@ class LabBookingResource extends Resource
                         'rejected' => 'Rejected',
                     ];
                     // Jika status completed, tampilkan juga completed
-                    if (($record && $record->status === 'completed') || $get('status') === 'completed') {
+                    if (
+                        ($record && in_array($record->status, ['completed'])) ||
+                        in_array($get('status'), ['completed'])
+                    ) {
                         $options['completed'] = 'Completed';
+                    }
+                    // Jika status returning, tampilkan juga returning
+                    if (
+                        ($record && in_array($record->status, ['returning'])) ||
+                        in_array($get('status'), ['returning'])
+                    ) {
+                        $options['returning'] = 'Returning';
                     }
                     return $options;
                 })
@@ -112,6 +122,7 @@ class LabBookingResource extends Resource
                     auth()->user()->hasRole('pengguna')),
         ]);
     }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -127,6 +138,7 @@ class LabBookingResource extends Resource
                         'warning' => 'pending',
                         'info' => 'approved',
                         'danger' => 'rejected',
+                        'primary' => 'returning',
                         'success' => 'completed',
                     ])
                     ->disabled(
@@ -139,6 +151,7 @@ class LabBookingResource extends Resource
                     'pending' => 'Pending',
                     'approved' => 'Approved',
                     'rejected' => 'Rejected',
+                    'returning' => 'Returning',
                     'completed' => 'Completed',
                 ]),
             ])
@@ -148,15 +161,15 @@ class LabBookingResource extends Resource
                     ->visible(
                         fn($record) =>
                         !auth()->user()->hasRole('monitor') &&
-                        (auth()->user()->hasRole(['admin', 'superadmin']) || 
-                        (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
+                        (auth()->user()->hasRole(['admin', 'superadmin']) ||
+                            (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
                     ),
                 Tables\Actions\DeleteAction::make()
                     ->visible(
                         fn($record) =>
                         !auth()->user()->hasRole('monitor') &&
-                        (auth()->user()->hasRole(['admin', 'superadmin']) || 
-                        (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
+                        (auth()->user()->hasRole(['admin', 'superadmin']) ||
+                            (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
                     ),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')
@@ -167,6 +180,20 @@ class LabBookingResource extends Resource
                         fn($record) =>
                         auth()->user()->hasRole('pengguna') &&
                         $record->status === 'approved'
+                    ),
+                // Add new action for admins to complete returning bookings
+                Tables\Actions\Action::make('complete')
+                    ->label('Verifikasi Selesai')
+                    ->color('success')
+                    ->icon('heroicon-m-check-badge')
+                    ->action(function ($record) {
+                        $record->status = 'completed';
+                        $record->save();
+                    })
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole(['admin', 'superadmin']) &&
+                        $record->status === 'returning'
                     ),
             ]);
     }

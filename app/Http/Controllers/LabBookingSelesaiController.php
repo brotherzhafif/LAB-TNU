@@ -20,10 +20,10 @@ class LabBookingSelesaiController extends Controller
         $path = $request->file('bukti_selesai')->store('bukti-lab', env('FILESYSTEM_DISK', 'local'));
 
         $booking->bukti_selesai = $path;
-        $booking->status = 'completed';
+        $booking->status = 'returning'; // Changed from 'completed' to 'returning'
         $booking->save();
 
         return redirect()->route('filament.super-admin.resources.lab-bookings.index')
-            ->with('success', 'Peminjaman berhasil ditandai selesai.');
+            ->with('success', 'Peminjaman berhasil ditandai selesai dan menunggu verifikasi admin.');
     }
 }

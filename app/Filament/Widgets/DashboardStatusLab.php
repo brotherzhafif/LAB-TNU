@@ -5,15 +5,13 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Filament\Tables;
 use App\Models\Lab;
-use App\Models\Tool;
 use App\Models\LabBooking;
-use App\Models\ToolBooking;
 use Illuminate\Support\Facades\Auth;
 
-class DashboardStatusAlatDanLab extends BaseWidget
+class DashboardStatusLab extends BaseWidget
 {
     protected static ?int $sort = 1;
-
+    protected static ?string $heading = 'Status Lab';
 
     public static function canView(): bool
     {
@@ -28,15 +26,9 @@ class DashboardStatusAlatDanLab extends BaseWidget
         $tanggal = $this->tanggal ?? now()->toDateString();
         $waktu = $this->waktu ?? now()->format('H:i');
 
-        $labQuery = Lab::query()
-            ->selectRaw("'Lab' as tipe, name as nama, location as lokasi, id, null as tool_lab_id, (select CASE WHEN COUNT(*) > 0 THEN 'Dipinjam' ELSE 'Kosong' END from `lab_bookings` where `lab_id` = `labs`.`id` and `status` = 'approved' and `tanggal` = ? and `waktu_mulai` <= ? and `waktu_selesai` >= ?) as status", [$tanggal, $waktu, $waktu]);
-
-        $toolQuery = Tool::query()
-            ->selectRaw("'Alat' as tipe, name as nama, (select location from labs where labs.id = tools.lab_id limit 1) as lokasi, id, lab_id as tool_lab_id, (select CASE WHEN COUNT(*) > 0 THEN 'Dipinjam' ELSE 'Kosong' END from `tool_bookings` where `tool_id` = `tools`.`id` and `status` = 'approved' and `tanggal` = ? and `waktu_mulai` <= ? and `waktu_selesai` >= ?) as status", [$tanggal, $waktu, $waktu]);
-
-        $union = $labQuery->unionAll($toolQuery);
-
-        return Lab::query()->fromSub($union, 'alat_lab_union')->orderBy('nama');
+        return Lab::query()
+            ->selectRaw("name as nama, location as lokasi, id, (select CASE WHEN COUNT(*) > 0 THEN 'Dipinjam' ELSE 'Kosong' END from `lab_bookings` where `lab_id` = `labs`.`id` and `status` = 'approved' and `tanggal` = ? and `waktu_mulai` <= ? and `waktu_selesai` >= ?) as status", [$tanggal, $waktu, $waktu])
+            ->orderBy('nama');
     }
 
     public function table(Tables\Table $table): Tables\Table
@@ -44,8 +36,7 @@ class DashboardStatusAlatDanLab extends BaseWidget
         return $table
             ->query($this->getTableQuery())
             ->columns([
-                Tables\Columns\TextColumn::make('tipe')->label('Tipe')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('nama')->label('Nama Lab')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('lokasi')->label('Lokasi')->sortable()->searchable(),
                 Tables\Columns\BadgeColumn::make('status')->label('Status')
                     ->colors([
@@ -54,12 +45,6 @@ class DashboardStatusAlatDanLab extends BaseWidget
                     ])->sortable()->searchable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('tipe')
-                    ->label('Tipe')
-                    ->options([
-                        'Lab' => 'Lab',
-                        'Alat' => 'Alat',
-                    ]),
                 Tables\Filters\Filter::make('tanggal')
                     ->label('Tanggal')
                     ->form([

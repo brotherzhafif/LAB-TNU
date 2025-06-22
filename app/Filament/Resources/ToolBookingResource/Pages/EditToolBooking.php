@@ -13,7 +13,8 @@ class EditToolBooking extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->hidden(fn($record) => auth()->user()?->hasRole('monitor') || ($record->status !== 'pending' && auth()->user()?->hasRole('pengguna')))
         ];
     }
 
