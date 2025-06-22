@@ -128,7 +128,11 @@ class LabBookingResource extends Resource
                         'info' => 'approved',
                         'danger' => 'rejected',
                         'success' => 'completed',
-                    ]),
+                    ])
+                    ->disabled(
+                        fn($record) => $record && $record->status === 'completed' ||
+                        auth()->user()?->hasRole(['pengguna', 'monitor'])
+                    ),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options([
@@ -141,9 +145,19 @@ class LabBookingResource extends Resource
             ->actions([
                 // Hanya admin/operator yang bisa edit/delete/selesai
                 Tables\Actions\EditAction::make()
-                    ->visible(fn() => !auth()->user()->hasRole('pengguna')),
+                    ->visible(
+                        fn($record) =>
+                        !auth()->user()->hasRole('monitor') &&
+                        (auth()->user()->hasRole(['admin', 'superadmin']) || 
+                        (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
+                    ),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn() => !auth()->user()->hasRole('pengguna')),
+                    ->visible(
+                        fn($record) =>
+                        !auth()->user()->hasRole('monitor') &&
+                        (auth()->user()->hasRole(['admin', 'superadmin']) || 
+                        (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
+                    ),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')
                     ->color('success')

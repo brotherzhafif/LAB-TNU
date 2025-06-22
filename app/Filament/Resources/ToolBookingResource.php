@@ -144,6 +144,7 @@ class ToolBookingResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('lab_id')->label('lab_id')->hidden(),
                 Tables\Columns\TextColumn::make('nama_pengguna')->label('Nama Pengguna')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('nit_nip')->label('NIT/NIP')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('tool.name')->label('Alat')->sortable()->searchable(),
@@ -171,14 +172,16 @@ class ToolBookingResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->visible(
                         fn($record) =>
-                        $record->status === 'pending'
-                        && auth()->user()->hasRole('pengguna')
+                        !auth()->user()->hasRole('monitor') &&
+                        (auth()->user()->hasRole(['admin', 'superadmin']) ||
+                            (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
                     ),
                 Tables\Actions\DeleteAction::make()
                     ->visible(
                         fn($record) =>
-                        $record->status === 'pending'
-                        && auth()->user()->hasRole('pengguna')
+                        !auth()->user()->hasRole('monitor') &&
+                        (auth()->user()->hasRole(['admin', 'superadmin']) ||
+                            (auth()->user()->hasRole('pengguna') && $record->status === 'pending'))
                     ),
                 Tables\Actions\Action::make('selesai')
                     ->label('Selesai')

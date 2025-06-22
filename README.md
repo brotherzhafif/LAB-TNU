@@ -69,7 +69,7 @@ Aplikasi ini adalah sistem informasi untuk mengelola peminjaman laboratorium dan
 
 -   **Superadmin**: Semua akses, kelola user, data master, monitoring.
 -   **Admin**: Kelola data lab, alat, approve/reject peminjaman.
--   **Monitor**: Hanya monitoring, tidak bisa edit data.
+-   **Monitor**: Hanya monitoring, tidak bisa edit, hapus, atau mengubah data apapun.
 -   **Pengguna**: Mahasiswa, hanya bisa mengajukan peminjaman.
 
 ---
