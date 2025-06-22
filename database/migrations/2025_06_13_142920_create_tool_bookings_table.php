@@ -14,14 +14,15 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('tool_id')->constrained()->onDelete('cascade');
-            $table->foreignId('lab_id')->constrained()->onDelete('cascade');
+            $table->string('nama_pengguna')->required();
+            $table->string('nit_nip')->required();
             $table->string('course')->nullable();
             $table->date('tanggal');
             $table->time('waktu_mulai');
             $table->time('waktu_selesai');
-            $table->integer('jumlah'); // jumlah alat yang dipinjam
+            $table->integer('jumlah');
             $table->enum('status', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
-            $table->string('bukti_selesai')->nullable(); // ubah dari json ke string
+            $table->string('bukti_selesai')->nullable();
             $table->timestamps();
         });
     }
