@@ -37,7 +37,10 @@ class DashboardStatusAlat extends BaseWidget
             ->query($this->getTableQuery())
             ->columns([
                 Tables\Columns\TextColumn::make('nama')->label('Nama Alat')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('lokasi')->label('Lokasi')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('tool_lab_id')->label('Lab')
+                    ->formatStateUsing(fn($state) => $state ? optional(\App\Models\Lab::find($state))->name : '-')
+                    ->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('lokasi')->label('Lokasi Lab')->sortable()->searchable(),
                 Tables\Columns\BadgeColumn::make('status')->label('Status')
                     ->colors([
                         'success' => 'Kosong',

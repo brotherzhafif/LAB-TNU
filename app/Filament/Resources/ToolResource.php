@@ -50,6 +50,7 @@ class ToolResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Nama Alat')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('lab.name')->label('Laboratorium')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('lab.location')->label('Lokasi Lab')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('total_quantity')->label('Total')->sortable(),
                 Tables\Columns\TextColumn::make('available_quantity')->label('Tersedia')->sortable(),
             ])

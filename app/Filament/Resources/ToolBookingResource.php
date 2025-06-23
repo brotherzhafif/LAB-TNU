@@ -158,6 +158,7 @@ class ToolBookingResource extends Resource
                 Tables\Columns\TextColumn::make('nama_pengguna')->label('Nama Pengguna')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('nit_nip')->label('NIT/NIP')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('tool.name')->label('Alat')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('tool.lab.name')->label('Lab')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('tanggal')->label('Tanggal')->date('d M Y')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('waktu_mulai'),
                 Tables\Columns\TextColumn::make('waktu_selesai'),
